@@ -27,14 +27,14 @@
 
 **Структура работы с устройствами Promobot:**
 
-![device_image](https://github.com/Promobot-education/robox/blob/main/docs/res/Edu.png "Struct") 
+![device_image](https://github.com/Promobot-education/robox/blob/master/docs/res/Edu.png "Struct") 
 
 
 ## Интерфейсная плата
 
 Интерфейcная плата (ROBOX) предназначена для преобразования интерфейсов USB-RS485, а также для обеспечения питанием подключенных устройств Promobot.
 
-![device_image](https://github.com/Promobot-education/robox/blob/main/docs/res/robox.png "Robox") 
+![device_image](https://github.com/Promobot-education/robox/blob/master/docs/res/robox.png "Robox") 
 
 :information_source: Более подробную информацию об интерфейсной плате можно найти в [Руководстве пользователя](https://github.com/Promobot-education/robox/blob/main/docs/Robox_manual.pdf)
 
@@ -47,12 +47,12 @@
 
 **Структура типового взаимодействия с сервоприводом:**
 
-![device_image](https://github.com/Promobot-education/robox/blob/main/docs/res/motor_struct.png "Motor_struct") 
+![device_image](https://github.com/Promobot-education/robox/blob/master/docs/res/motor_struct.png "Motor_struct") 
 
  
-:information_source: [Описание библиотеки сервопривода на Python](https://github.com/Promobot-education/robox/blob/main/docs/servo_py.md)
+:information_source: [Описание библиотеки сервопривода на Python](https://github.com/Promobot-education/robox/blob/master/docs/servo_py.md)
 
-:information_source: [Описание библиотеки сервопривода на C](https://github.com/Promobot-education/robox/blob/main/docs/servo_c.md)
+:information_source: [Описание библиотеки сервопривода на C](https://github.com/Promobot-education/robox/blob/master/docs/servo_c.md)
 
 
 
@@ -62,17 +62,17 @@ Ranger_Sensor предназначен для детектирования пр�
 
 **Структура типового взаимодействия с датчиком расстояния:**
 
-![device_image](https://github.com/Promobot-education/robox/blob/main/docs/res/Range_struct.png "Range_struct") 
+![device_image](https://github.com/Promobot-education/robox/blob/master/docs/res/Range_struct.png "Range_struct") 
 
-:information_source: [Описание библиотеки датчика расстояния на Python](https://github.com/Promobot-education/robox/blob/main/docs/ranger_py.md)
+:information_source: [Описание библиотеки датчика расстояния на Python](https://github.com/Promobot-education/robox/blob/master/docs/ranger_py.md)
 
-:information_source: [Описание библиотеки датчика расстояния на C](https://github.com/Promobot-education/robox/blob/main/docs/ranger_c.md)
+:information_source: [Описание библиотеки датчика расстояния на C](https://github.com/Promobot-education/robox/blob/master/docs/ranger_c.md)
 
 
 
 ## Начало работы
 
-:warning: Перед проведением работ необходимо ознакомиться с [Руководством пользователя](https://github.com/Promobot-education/robox/blob/main/docs/Robox_manual.pdf)
+:warning: Перед проведением работ необходимо ознакомиться с [Руководством пользователя](https://github.com/Promobot-education/robox/blob/master/docs/Robox_manual.pdf)
 
 #### Подготовка
 
