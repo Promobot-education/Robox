@@ -15,11 +15,6 @@ parser.add_argument('-p', '--port', type=str, help='port for flashing',default='
 
 args = parser.parse_args()
 
-
-#modbus_io.TIMEOUT = 0.03
-#modbus_io.CLOSE_PORT_AFTER_EACH_CALL = True
-#modbus_io.BAUDRATE = 460800
-
 mod_port = str(args.port)
 
 ping_devs = []
@@ -32,7 +27,6 @@ def ping():
 		time.sleep(0.1)
 		try:
 			temp = Servo.Servo(mod_port,element,debug = False,ping = True)
-			#temp = modbus_io.Instrument(mod_port, element, mode=modbus_io.MODE_RTU)
 			val = temp._ping(2, 1, 3)
 			ping_devs.append(element)
 		except Exception:
@@ -147,5 +141,4 @@ parts = (len(b)/packet)
 
 
 ping()
-#boot(33)
 boot(ping_devs[0])

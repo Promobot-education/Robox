@@ -111,5 +111,18 @@ Servo.c
         Args:
             addr: адрес устройства 
         Returns:
-            данные с сервопривода
+            данные с сервопривода. Словарь с ключами:
+                "Torque", 
+                "Setpoint" 
+                "Position" 
+                "Speed" 
+                "Command" 
+                "Current" 
+                "Pos_PID_P" 
+                "Pos_PID_I" 
+                "Pos_PID_D" 
+                "Speed_PID_P" 
+                "Speed_PID_I" 
+                "Speed_PID_D" 
+                "Errors"
 

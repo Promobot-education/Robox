@@ -1,11 +1,12 @@
 #
 # Build: docker build --network="host" -t promobot_edu .
-# docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" -v /home/student/Edu:/home/alek/Edu promobot_edu
+# docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" -v /home/student/edu_env:/home/alek/edu_env promobot_edu
 #
 
 FROM ubuntu:xenial
 
 LABEL maintainer alek.yum@yandex.ru
+
 
 # download APT utils
 RUN apt update && apt install -y \
@@ -17,6 +18,8 @@ RUN apt update && apt install -y ssh ssh-client git sudo setserial udev autoconf
 
 
 RUN git clone --single-branch --branch v3.1.6 https://github.com/stephane/libmodbus.git
+
+
 RUN cd libmodbus && ./autogen.sh && ./configure && make install && cd /
 
 
@@ -35,9 +38,10 @@ RUN apt update && apt install --no-install-recommends -y \
 
 RUN python -m pip install -U pip --ignore-installed
 
-RUN pip install git+https://github.com/Promobot-education/Python_modules.git
+#RUN pip install git+https://github.com/Promobot-education/Python_modules.git
 
-RUN pip3 install git+https://github.com/Promobot-education/Python_modules.git
+#RUN pip3 install git+https://github.com/Promobot-education/Python_modules.git
+
 
 # setup environment
 ENV LANG C.UTF-8
