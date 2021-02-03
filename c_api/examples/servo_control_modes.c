@@ -21,6 +21,7 @@ int main()
   init_servo(servo_addr);
 
   //Стандартный режим работы сервопривода
+  printf("Normal mode: \n");  
   set_PID_mode(servo_addr,NORMAL);
 
   //Включение питания обмоток двигателя
@@ -34,6 +35,9 @@ int main()
   //Выключение питания обмоток двигателя
   set_torque(servo_addr,false);
 
+
+
+  printf("Only speed PID mode: \n");  
   //Режим ПИД по скорости
   set_PID_mode(servo_addr,SPEED);
 
@@ -46,6 +50,9 @@ int main()
 
   set_torque(servo_addr,false);
 
+
+
+  printf("PWM mode: \n"); 
   //Прямой режим работы. Без ПИД регуляторов
   set_PID_mode(servo_addr,PWM);
   set_torque(servo_addr,true);

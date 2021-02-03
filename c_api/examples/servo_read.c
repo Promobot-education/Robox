@@ -33,6 +33,7 @@ int main()
     printf("Position: %i\n",data.position);
     printf("Setpoint: %i\n",data.setpoint);
     printf("Motor current: %i mA \n\n",data.current);
+    usleep(10000);
   }   
   return 0; 
 }
