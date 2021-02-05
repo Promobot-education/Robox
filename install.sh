@@ -20,14 +20,7 @@ apt install --no-install-recommends -y \
     python3-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
-apt install -y \
-    gcc-5 g++-5 wget tar openssh-client libva-drm1 \
-    && rm -rf /var/lib/apt/lists/*
-
-
-wget https://cmake.org/files/v3.9/cmake-3.9.0-Linux-x86_64.tar.gz \
-    && tar -xzvf cmake-3.9.0-Linux-x86_64.tar.gz --strip-components=1 -C /usr/local \
-    && rm cmake-3.9.0-Linux-x86_64.tar.gz
+apt install build-essential
 
 
 cd python_api && sudo python3 setup.py install && cd ..
