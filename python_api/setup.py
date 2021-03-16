@@ -21,5 +21,6 @@ setup(
     },
     description="Python modules to communicate with Promobot servos and range sensors",
     python_requires=">=2.7",
+    packages=['modbus_tk'],
     py_modules=["Ranger","Servo","modbus_io"],
 )

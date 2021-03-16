@@ -10,6 +10,12 @@ import Servo
 import Ranger
 import time
 
+import serial
+
+import modbus_tk
+import modbus_tk.defines as cst
+from modbus_tk import modbus_rtu
+
 #Порт шины данных. По умолчпнию /dev/RS_485
 port        = '/dev/RS_485'
 
@@ -19,14 +25,19 @@ servo_id    = 10
 #Адрес датчика расстояния. По умолчанию 1
 sensor_id   = 1
 
+#Инициализация последовательного порта
+master = modbus_rtu.RtuMaster(serial.Serial(port=port, baudrate=460800, bytesize=8, parity='N', stopbits=1, xonxoff=0))
+
+
 #Соотношение изменения расстояния к измененюи перемещения сервопривода
 distance_to_pos_scale = 100
 
 #Инициализация сервопривода
-servo = Servo.Servo(port,servo_id,debug = False)
+servo = Servo.Servo(servo_id,master)
+
 
 #Инициализация датчика расстояния
-sensor = Ranger.Sensor(port,sensor_id,debug = False)
+sensor = Ranger.Sensor(sensor_id,master)
 
 #Включение питания обмоток мотора
 servo.set_torque(1)

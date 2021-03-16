@@ -9,7 +9,13 @@ __status__ = "Production"
 __url__ = "https://git.promo-bot.ru"
 __version__ = "0.1.0"
 
-import modbus_io
+
+import serial
+
+import modbus_tk
+import modbus_tk.defines as cst
+from modbus_tk import modbus_rtu
+
 
 #Ranger registers
 _TRIG_REGISTER      = 20
@@ -34,63 +40,29 @@ class Sensor():
         * port (str): Имя последовательног порта шины данных, например ``/dev/RS485``.
         * address (int): Адрес устройства. 1-250
         * baudrate (int): Скорость соединения. По умолчанию 460800 Бод
-        * debug (bool): включение отладочного режима.
         
     """
 
-    def __init__(self,port,address,baudrate = 460800,debug = False):
-        modbus_io.CLOSE_PORT_AFTER_EACH_CALL = True
-        modbus_io.BAUDRATE = baudrate
-        modbus_io.TIMEOUT = 0.1
-        try:
-            self.client = modbus_io.Instrument(port, address)
-            self.client.debug = debug
-        except Exception as e:   
-            print('Cant init port:{0}  {1}'.format(port, e))                    
-            exit()  
+    def __init__(self,addr,master):
 
-    #######PRIVATE FUNCTIONS#######      
+        self.master = master
+        self.addr = addr
+        self.logger = modbus_tk.utils.create_logger("console")
 
-    def _write_register(self,
-                        registeraddress,
-                        value,
-                        numberOfDecimals=0,
-                        functioncode=6,
-                        signed=True):
-        try:
-            self.client.write_register(registeraddress, value, numberOfDecimals, 6, signed)
-            return True
-        except Exception as e:
-            print('ERROR! Sensor:{0}  {1}'.format(self.client.address, e))
-        return False
+    #######PRIVATE FUNCTIONS#######
 
-
-
-
-    def _write_registers(self,
-                        registeraddress,
-                        values):
-        try:
-            self.client.write_registers(registeraddress, values)
-            return True
-        except Exception as e:
-            print('ERROR! Sensor:{0}  {1}'.format(self.client.address, e))
-        return False
-
-
-    def _read_registers(self,
-                        registeraddress,
-                        numberOfRegisters,
-                        functioncode=3):
-        try:
-            return self.client.read_registers(registeraddress, numberOfRegisters, functioncode)
-        except Exception as e:
-            print('ERROR! Sensor:{0}  {1}'.format(self.client.address, e))
-        return False   
+    def except_decorator(fn):
+        def wrapped(self,*args):
+            try:
+                return fn(self,*args)
+            except Exception as e:
+                self.logger.error("%s", e)
+                return False
+        return wrapped
 
     ############################ 
 
-
+    @except_decorator
     def trig_sensor(self):
         """Старт измерения.
 
@@ -102,11 +74,12 @@ class Sensor():
         Raises:
             None
 
-        """           
-        return self._write_register(_TRIG_REGISTER,1)
+        """
+        
+        return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _TRIG_REGISTER, output_value=1)
 
 
-
+    @except_decorator
     def read_sensor(self):
         """Чтение данных (измеренная дистанция) с датчика
 
@@ -121,18 +94,20 @@ class Sensor():
 
         """           
         data = {}
-        values = self._read_registers(_RESULT_REGISTER, 2)
-        if values is not False:
 
-            data["IR_distance"] = values[0] / 10
-            data["US_distance"] = values[1]
+        values = self.master.execute(1, cst.READ_HOLDING_REGISTERS, _RESULT_REGISTER, 2)
+        
+        data["IR_distance"] = values[0] / 10
+        data["US_distance"] = values[1]
 
-            data["IR_distance"] = 255 if data["IR_distance"] == 819 else data["IR_distance"] 
-            data["US_distance"] = 255 if data["US_distance"] == 8100 else data["US_distance"]
+        data["IR_distance"] = 255 if data["IR_distance"] == 819 else data["IR_distance"] 
+        data["US_distance"] = 255 if data["US_distance"] == 8100 else data["US_distance"]   
+
         return data
+        
 
 
-
+    #@except_decorator
     def set_min_dist(self,dist):
         """Выставление порога измеренного расстояния, ниже которого загорается светодиод
 
@@ -146,4 +121,6 @@ class Sensor():
 
         """          
         if dist > _MIN_LED_DIST and dist <= _MAX_LED_DIST:
-            return self._write_register(_MIN_DIST_REGISTER,dist) 
+            return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _TRIG_REGISTER, output_value=dist)
+        else:
+            raise ValueError("Wrong value for min dist!")     

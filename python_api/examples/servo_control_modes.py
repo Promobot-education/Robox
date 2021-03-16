@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import Servo
-import time
+
 """
 servo_mode_to.py
 
@@ -16,14 +15,28 @@ servo_mode_to.py
 
 """
 
+
+import Servo
+import time
+
+import serial
+
+import modbus_tk
+import modbus_tk.defines as cst
+from modbus_tk import modbus_rtu
+
 #Порт шины данных. По умолчпнию /dev/RS_485
 port        = '/dev/RS_485'
 
 #Адрес сервопривода. По умолчанию 10
 servo_id    = 10
 
+#Инициализация последовательного порта
+master = modbus_rtu.RtuMaster(serial.Serial(port=port, baudrate=460800, bytesize=8, parity='N', stopbits=1, xonxoff=0))
+
+
 #Инициализация сервопривода
-servo = Servo.Servo(port,servo_id,debug = False)
+servo = Servo.Servo(servo_id,master)
 
 
 if __name__ == '__main__':
