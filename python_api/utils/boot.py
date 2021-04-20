@@ -24,7 +24,7 @@ instr = None
 def ping():
 	print("Pinging devices...")
 	for element in range(0, 50):
-		time.sleep(0.1)
+		time.sleep(0.01)
 		try:
 			temp = Servo.Servo(mod_port,element,debug = False,ping = True)
 			val = temp._ping(2, 1, 3)
@@ -118,6 +118,7 @@ def set_params(id):
 	instr._write_register(0,10,signed=False)
 	instr._write_register(40,0xACDC,signed=False)
 	instr._write_register(28,1000,signed=False)		
+	time.sleep(1)
 	instr._write_register(40,0xDEAD,signed=False)
 
 def boot(id):
@@ -131,7 +132,7 @@ def boot(id):
 	time.sleep(1)
 	send_data(packet,parts)
 	print("Rebooting device")
-	time.sleep(8)
+	time.sleep(10)
 	set_params(id)
 	print("FIRMWARING FINISHED!")
 
