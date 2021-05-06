@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import Servo
-import time
 """
 servo_mode_to.py
 
@@ -10,14 +8,21 @@ servo_mode_to.py
 
 """
 
+import Servo
+import time
+import bus_handler
+
 #Порт шины данных. По умолчпнию /dev/RS_485
 port        = '/dev/RS_485'
 
 #Адрес сервопривода. По умолчанию 10
 servo_id    = 10
 
+#Инициализация шины передачи данных
+master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0)
+
 #Инициализация сервопривода
-servo = Servo.Servo(port,servo_id,debug = True)
+servo = Servo.Servo(servo_id, master.bus)
 
 #Включение питания обмоток мотора
 servo.set_torque(1)

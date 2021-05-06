@@ -9,6 +9,7 @@ servo_mode_to.py
 import Servo
 import Ranger
 import time
+import bus_handler
 
 #Порт шины данных. По умолчпнию /dev/RS_485
 port        = '/dev/RS_485'
@@ -19,14 +20,18 @@ servo_id    = 10
 #Адрес датчика расстояния. По умолчанию 1
 sensor_id   = 1
 
+#Инициализация шины передачи данных
+master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0)
+
+
 #Соотношение изменения расстояния к измененюи перемещения сервопривода
 distance_to_pos_scale = 100
 
 #Инициализация сервопривода
-servo = Servo.Servo(port,servo_id,debug = False)
+servo = Servo.Servo(servo_id, master.bus)
 
 #Инициализация датчика расстояния
-sensor = Ranger.Sensor(port,sensor_id,debug = False)
+sensor = Ranger.Sensor(sensor_id, master.bus)
 
 #Включение питания обмоток мотора
 servo.set_torque(1)

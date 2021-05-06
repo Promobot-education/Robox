@@ -4,7 +4,7 @@ import time
 import argparse
 import modbus_io
 import struct
-import Servo
+import Servo_service as Servo
 
 
 packet = 128
@@ -24,9 +24,9 @@ instr = None
 def ping():
 	print("Pinging devices...")
 	for element in range(0, 50):
-		time.sleep(0.01)
+		time.sleep(0.005)
 		try:
-			temp = Servo.Servo(mod_port,element,debug = False,ping = True)
+			temp = Servo.Servo(mod_port,element,debug = True,ping = True)
 			val = temp._ping(2, 1, 3)
 			ping_devs.append(element)
 		except Exception:
@@ -128,6 +128,7 @@ def boot(id):
 	instr = Servo.Servo(mod_port,id)
 	instr.debug = False
 	reboot_device(id)
+	time.sleep(2)
 	send_parts(packet,parts)
 	time.sleep(1)
 	send_data(packet,parts)
@@ -142,4 +143,4 @@ parts = (len(b)/packet)
 
 
 ping()
-boot(ping_devs[0])
+boot(22)

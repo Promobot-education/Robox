@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import matplotlib.pyplot as plt
-import Servo
-import time
+
 """
 servo_plot.py
 
@@ -11,8 +9,22 @@ servo_plot.py
 
 """
 
+import matplotlib.pyplot as plt
+import Servo
+import time
+import bus_handler
+
+#Порт шины данных. По умолчпнию /dev/RS_485
+port        = '/dev/RS_485'
+
+#Адрес сервопривода. По умолчанию 10
+servo_id    = 10
+
+#Инициализация шины передачи данных
+master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0)
+
 #Инициализация сервопривода
-servo = Servo.Servo('/dev/RS_485',10,debug = False)
+servo = Servo.Servo(servo_id, master.bus)
 
 #Желаемая позиция сервопривода
 set_point   = 4000

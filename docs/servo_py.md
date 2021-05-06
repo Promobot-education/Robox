@@ -1,26 +1,16 @@
 Servo.py
 --------
 
-### class Servo(port,address,baudrate = 460800,debug = False)
+### class Servo(addr,master,init = True)
         Класс для работы с сервоприводом.
     
         Args:
-            * port (str): Имя последовательног порта шины данных, например ``/dev/RS485``.
-            * slaveaddress (int): Адрес устройства. 1-250
-            * baudrate (int): Скорость соединения. По умолчанию 460800 Бод
-            * debug (bool): включение отладочного режима.
+            * master (ModbusRTU): объект посдеовательного порта`.
+            * addr (int): Адрес устройства. 1-250
+            * init (bool): Начальная инициализация сервопривода
 
 
-### custom_command(function,payload):
-        Отправка пользовательской команды Modbus RTU.
-        Args:       
-            * functioncode (int): код пользовательской функции. Например "запись в регистр" = 16.
-            * payloadToSlave (bytearray): Данные для отправки (к этим данным автоматически будут добавлен адрес устройства и CRC)
-        Returns:
-            * ответ от устройства (string)
-        Raises:
-            ValueError
-  
+
 ### set_torque(state):
         Включение(отключение) питания обмоток двигателя
         Args:       
@@ -33,10 +23,23 @@ Servo.py
         Raises:
             ValueError
 
-### set_command(command):
-        Write command to servo.
+
+### set_speed(speed):
+        Установить ограничение по скорсоти дял сервопривода.
         Args:
-            * command (int): one of available commands. 
+            * speed (int): желаемая скорость. 
+        Returns:
+            * True если отправка команды прошла успешно
+            * False если при отправке команды произошла ошибка
+        Raises:
+            ValueError
+
+
+
+### set_command(command):
+        Запись команды в сервопривод.
+        Args:
+            * command (int): одна из доступных команд. 
         Returns:
             * True если отправка команды прошла успешно
             * False если при отправке команды произошла ошибка
@@ -132,6 +135,7 @@ Servo.py
             None
         Returns:
             * Словарь с ключами: 
+                 "ID"
                  "Torque", 
                  "Setpoint" 
                  "Position" 

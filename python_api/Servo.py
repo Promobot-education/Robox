@@ -11,7 +11,10 @@ __url__ = "https://git.promo-bot.ru"
 __version__ = "0.1.0"
 
 
-import modbus_io
+import modbus_tk
+import modbus_tk.defines as cst
+from modbus_tk import modbus_rtu
+
 import struct
 
 
@@ -27,6 +30,8 @@ _COMMAND_REG        = 40
 _ERRORS_REG         = 45
 _CURRENT_REG        = 49
 
+_SPEED_LIMIT_REG    = 22
+
 _PID_SPEED_P_REG    = 10
 _PID_SPEED_I_REG    = 12
 _PID_SPEED_D_REG    = 14
@@ -37,7 +42,7 @@ _PID_POS_D_REG      = 20
 
 
 #Allowed commands
-_PASS_COMMANDS      = [0xDEAD,
+_PASS_COMMANDS      = [0x0,0xDEAD,
                       0xAAAA]
 
 #PID max and min values
@@ -60,75 +65,34 @@ class Servo():
     """Класс для работы с сервоприводом.
 
     Args:
-        * port (str): Имя последовательног порта шины данных, например ``/dev/RS485``.
-        * slaveaddress (int): Адрес устройства. 1-250
-        * baudrate (int): Скорость соединения. По умолчанию 460800 Бод
-        * debug (bool): включение отладочного режима.
+        * master (ModbusRTU): объект посдеовательного порта`.
+        * addr (int): Адрес устройства. 1-250
+        * init (bool): Инициализация
     
     """
-    def __init__(self,port,address,baudrate = 460800,debug = False,ping = False):
-        modbus_io.CLOSE_PORT_AFTER_EACH_CALL = True
-        modbus_io.BAUDRATE = baudrate
-        modbus_io.TIMEOUT = 0.1
-        try:
-            self.client = modbus_io.Instrument(port, address)
-            self.client.debug = debug
-        except Exception as e:   
-            print('Cant init port:{0}  {1}'.format(port, e))                    
-            exit()  
-        if not ping:    
+    def __init__(self,addr,master,init = True):
+
+
+        self.master = master
+        self.addr = addr
+        self.logger = modbus_tk.utils.create_logger("console")
+        if (init):   
             self._init_settings()
 
 
 
-    #######PRIVATE FUNCTIONS#######      
-    def _write_register(self,
-                        registeraddress,
-                        value,
-                        numberOfDecimals=0,
-                        functioncode=6,
-                        signed=True):
-        try:
-            self.client.write_register(registeraddress, value, numberOfDecimals, 6, signed)
-            return True
-        except Exception as e:
-            print('ERROR! Servo:{0}  {1}'.format(self.client.address, e))
-        return False
+    #######PRIVATE FUNCTIONS#######     
 
+    def except_decorator(fn):
+        def wrapped(self,*args):
+            try:
+                return fn(self,*args)
+            except Exception as e:
+                self.logger.error("%s", e)
+                return False
+        return wrapped
 
-
-
-    def _write_registers(self,
-                        registeraddress,
-                        values):
-        try:
-            self.client.write_registers(registeraddress, values)
-            return True
-        except Exception as e:
-            print('ERROR! Servo:{0}  {1}'.format(self.client.address, e))
-        return False
-
-
-
-    def _ping(self,
-            registeraddress,
-            numberOfRegisters,
-            functioncode=3):
-        
-        return self.client.read_registers(registeraddress, numberOfRegisters, functioncode)
- 
-
-
-    def _read_registers(self,
-                        registeraddress,
-                        numberOfRegisters,
-                        functioncode=3):
-        try:
-            return self.client.read_registers(registeraddress, numberOfRegisters, functioncode)
-        except Exception as e:
-            print('ERROR! Servo:{0}  {1}'.format(self.client.address, e))
-        return False        
-
+     
 
     def _bytes_to_float(self,high,low):
         raw = struct.pack('>HH',low,high)
@@ -173,40 +137,25 @@ class Servo():
 
 
     def _init_settings(self):
-        mode = self._read_registers(_MODE_2_REG,1,3)
-        if (mode is not False):
-            mode[0] =  mode[0] & ~(1<<0)
-            if (self._write_register(_MODE_2_REG,mode[0],signed=False) == 0):
-                print('ERROR! Cant init servo:{0}'.format(self.client.address))
-                return True 
-            else:
-                print('Servo:{0} Inited!'.format(self.client.address))
-                return False    
-        else:
-            print('ERROR! Cant init servo:{0}'.format(self.client.address))
-            return False        
+        try:
+            mode = self.master.execute(self.addr, cst.READ_HOLDING_REGISTERS, _MODE_2_REG, 1)
+        except:
+            print('ERROR! Cant init servo:{0}'.format(self.addr))
+            return False
+
+        mode_new =  mode[0] & ~(1<<0)
+        try:
+            self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _MODE_2_REG, output_value=mode_new)    
+            print('Servo:{0} Inited!'.format(self.addr))
+            return True 
+        except:
+            print('ERROR! Cant init servo:{0}'.format(self.addr))
+            return False            
     ############################    
 
 
-    def custom_command(self,function,payload):
-        """Отправка пользовательской команды Modbus RTU.
 
-        Args:       
-            * functioncode (int): код пользовательской функции. Например "запись в регистр" = 16.
-            * payloadToSlave (bytearray): Данные для отправки (к этим данным автоматически будут добавлен адрес устройства и CRC)
-        Returns:
-            * ответ от устройства (string)
-        Raises:
-            ValueError
-
-        """  
-        out =  self.client._perform_custom_command(function,payload)
-        out =  list(out)
-        out[:] = [ord(x) for x in out]
-        return out
-
-
-
+    @except_decorator
     def set_torque(self,state):
         """Включение(отключение) питания обмоток двигателя
 
@@ -222,13 +171,36 @@ class Servo():
 
         """         
         if state == 1 or state == 0:
-            return self._write_register(_TORQUE_REG,state)
+            return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _TORQUE_REG, output_value=state)
         else:
             raise ValueError("Wrong value for torque_register!") 
 
 
+
+    @except_decorator
+    def set_speed(self,speed):
+        """Установка скорости сервопривода.
+
+        Args:
+            * speed (int): speed limit. 
+        Returns:
+            * True если отправка команды прошла успешно
+            * False если при отправке команды произошла ошибка
+        Raises:
+            ValueError
+
+        """
+        if speed > 0:                 
+            val = self._float_to_bytes(speed)
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _SPEED_LIMIT_REG, output_value=val)
+        else:
+            raise ValueError("Wrong speed value!")
+
+
+
+    @except_decorator
     def set_command(self,command):
-        """Write command to servo.
+        """Отправка команды в сервопривод.
 
         Args:
             * command (int): one of available commands. 
@@ -240,11 +212,12 @@ class Servo():
 
         """                 
         if command in _PASS_COMMANDS:
-            return self._write_register(_COMMAND_REG,command,signed=False)
+            return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _COMMAND_REG, output_value=command)
         else:
             raise ValueError("Wrong command for command_register!")
 
 
+    @except_decorator
     def set_point(self,value):
         """Установка задачи. (Положение, скорость, ШИМ в зависимости от режима работы)
 
@@ -257,9 +230,10 @@ class Servo():
             None
 
         """            
-        return self._write_register(_SETPOINT_REG,value,signed=True)
+        #return self._write_register(_SETPOINT_REG,value,signed=True)
+        return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _SETPOINT_REG, output_value=value)
 
-
+    @except_decorator
     def set_Pos_PID_P(self,value):
         """Запись коэф. P в ПИД регулятор по положению.
 
@@ -274,9 +248,9 @@ class Servo():
         """                   
         if (self._check_PID_val(value)):
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_POS_P_REG,val)
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_POS_P_REG, output_value=val)
                 
-
+    @except_decorator            
     def set_Pos_PID_I(self,value):
         """Запись коэф. I в ПИД регулятор по положению.
 
@@ -291,9 +265,9 @@ class Servo():
         """                    
         if (self._check_PID_val(value)):
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_POS_I_REG,val)            
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_POS_I_REG, output_value=val)            
 
-
+    @except_decorator        
     def set_Pos_PID_D(self,value):
         """Запись коэф. D в ПИД регулятор по положению.
 
@@ -308,9 +282,10 @@ class Servo():
         """           
         if (self._check_PID_val(value)):     
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_POS_D_REG,val)    
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_POS_D_REG, output_value=val)      
 
 
+    @except_decorator        
     def set_Speed_PID_P(self,value):
         """Запись коэф. P в ПИД регулятор по скорости.
 
@@ -325,9 +300,10 @@ class Servo():
         """               
         if (self._check_PID_val(value)):     
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_SPEED_P_REG,val)              
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_SPEED_P_REG, output_value=val)                 
 
 
+    @except_decorator
     def set_Speed_PID_I(self,value):
         """Запись коэф. I в ПИД регулятор по скорости.
 
@@ -342,9 +318,10 @@ class Servo():
         """                      
         if (self._check_PID_val(value)):     
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_SPEED_I_REG,val)  
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_SPEED_I_REG, output_value=val)   
 
 
+    @except_decorator
     def set_Speed_PID_D(self,value):
         """Запись коэф. D в ПИД регулятор по скорости.
 
@@ -359,9 +336,11 @@ class Servo():
         """              
         if (self._check_PID_val(value)):     
             val = self._float_to_bytes(value)
-            return self._write_registers(_PID_SPEED_D_REG,val)  
+            #return self._write_registers(_PID_SPEED_D_REG,val)
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _PID_SPEED_D_REG, output_value=val)   
 
 
+    @except_decorator
     def set_PID_Mode(self,value):
         """Высталвение режима работы ПИД регуляторов сервопривода.
 
@@ -377,25 +356,27 @@ class Servo():
         Raises:
             ValueError
 
-        """  
-        mode = self._read_registers(_MODE_1_REG,1,3)
+        """ 
+        mode = self.master.execute(self.addr, cst.READ_HOLDING_REGISTERS, _MODE_1_REG, 1)
+
         if value == "NORMAL":
-            mode[0] =  mode[0] | (1<<1)
-            mode[0] =  mode[0] | (1<<2)
+            mode_new =  mode[0] | (1<<1)
+            mode_new =  mode_new | (1<<2)
 
 
         if value == "PWM":
-            mode[0] =  mode[0] & ~(1<<1)
-            mode[0] =  mode[0] & ~(1<<2)
+            mode_new =  mode[0] & ~(1<<1)
+            mode_new =  mode_new & ~(1<<2)
 
     
         if value == "SPEED":
-            mode[0] =  mode[0] | (1<<1)
-            mode[0] =  mode[0] & ~(1<<2)
+            mode_new =  mode[0] | (1<<1)
+            mode_new =  mode_new & ~(1<<2)
 
-        return self._write_register(_MODE_1_REG,mode[0],signed=False)   
+        return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _MODE_1_REG, output_value=mode_new)   
 
-               
+    
+    @except_decorator    
     def get_data(self):
         """Чтение данных с сервопривода
 
@@ -403,6 +384,7 @@ class Servo():
             None
         Returns:
             * Словарь с ключами: 
+                | "ID", 
                 | "Torque", 
                 | "Setpoint" 
                 | "Position" 
@@ -421,9 +403,11 @@ class Servo():
 
         """          
         data = {}
-        values = self._read_registers(0,50)
-        if (values is not False):
+        #values = self._read_registers(0,50)
+        values = self.master.execute(self.addr, cst.READ_HOLDING_REGISTERS, 0, 50)
+        if values:
         
+            data["ID"]              = values[0]
             data["Torque"]          = values[_TORQUE_REG]
             data["Setpoint"]        = self._getSignedNumber(values[_SETPOINT_REG],16)
             data["Position"]        = self._getSignedNumber(values[_POS_REG],16)
