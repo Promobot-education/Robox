@@ -66,7 +66,7 @@ class Servo():
         * debug (bool): включение отладочного режима.
     
     """
-    def __init__(self,port,address,baudrate = 460800,debug = True,ping = False):
+    def __init__(self, port, address, baudrate = 460800, debug = False, ping = False):
         modbus_io.CLOSE_PORT_AFTER_EACH_CALL = False
         modbus_io.BAUDRATE = baudrate
         modbus_io.TIMEOUT = 0.05

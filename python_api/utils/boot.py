@@ -4,7 +4,9 @@ import time
 import argparse
 import modbus_io
 import struct
-import Servo_service as Servo
+import Servo
+
+py_ver = sys.version_info[0]
 
 
 packet = 128
@@ -24,9 +26,9 @@ instr = None
 def ping():
 	print("Pinging devices...")
 	for element in range(0, 50):
-		time.sleep(0.005)
+		time.sleep(0.01)
 		try:
-			temp = Servo.Servo(mod_port,element,debug = True,ping = True)
+			temp = Servo.Servo(mod_port,element,debug = False,ping = True)
 			val = temp._ping(2, 1, 3)
 			ping_devs.append(element)
 		except Exception:
@@ -39,7 +41,10 @@ def reboot_device(device):
 	print("Firmwaring device " + str(device) + " ...")
 	data = bytearray([0x00,0x01])
 	try:
-		instr.custom_command(0xAA, str(data))
+		if py_ver > 2:
+			instr.custom_command(0xAA, str(data,encoding='latin1'))
+		else:
+			instr.custom_command(0xAA, str(data))
 		#instr._performCommand(0xAA, str(data))
 		print('REBOOT DEVICE:SUCCES') 
 		return 1 
@@ -53,20 +58,22 @@ def reboot_device(device):
 
 
 def send_parts(packet,parts):
-	global instr
 	packet_array = struct.pack(">H",int(packet))
 	parts_array = struct.pack(">H",int(parts))
-	data = bytearray([packet_array[0],packet_array[1],parts_array[0],parts_array[1]])
 
+	data = bytearray([packet_array[0],packet_array[1],parts_array[0],parts_array[1]])
 	bad_count = 0 
 	while True:
 		try:
-			instr.custom_command(0xAB, str(data))
+			if py_ver > 2:
+				instr.custom_command(0xAB, str(data,encoding='latin1'))
+			else:
+				instr.custom_command(0xAB, str(data))
 			#instr._performCommand(0xAB, str(data))
 			print('SEND DATA SIZE:SUCCES') 
 			return 1
 		#except Exception as e:
-		#	print(e)	
+		#	print(e)
 		except IOError:
 			bad_count = bad_count + 1
 		except ValueError:	
@@ -77,7 +84,6 @@ def send_parts(packet,parts):
 
 
 def send_data(packet,parts):
-	global instr
 	a = 0
 	while a <= parts + 1:
 		k = 0
@@ -92,7 +98,10 @@ def send_data(packet,parts):
 				data.append(b[k+7*a])
 			k = k + 1   
 		try:
-			instr.custom_command(0xAC, str(data))
+			if py_ver > 2:
+				instr.custom_command(0xAC, str(data,encoding='latin1'))
+			else:
+				instr.custom_command(0xAC, str(data))
 			#instr._performCommand(0xAC, str(data))
 		except IOError:
 			print("SEND_DATA:FAILED: IOerror(No answer from device)")
@@ -121,14 +130,14 @@ def set_params(id):
 	time.sleep(1)
 	instr._write_register(40,0xDEAD,signed=False)
 
+
+
 def boot(id):
-	global mod_port
 	global instr
 	
 	instr = Servo.Servo(mod_port,id)
-	instr.debug = False
+	instr.debug = True
 	reboot_device(id)
-	time.sleep(2)
 	send_parts(packet,parts)
 	time.sleep(1)
 	send_data(packet,parts)
@@ -143,4 +152,4 @@ parts = (len(b)/packet)
 
 
 ping()
-boot(22)
+boot(ping_devs[0])
