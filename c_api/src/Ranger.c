@@ -63,7 +63,7 @@ struct sensor_data read_sensor(int addr)
 	{
 
 		output_data.IR_distance      =  regData[0] / 10;
-		output_data.US_distance 	 =  regData[0];
+		output_data.US_distance 	 =  regData[1];
 
 		if (output_data.IR_distance == 819) output_data.IR_distance = 255;
 		if (output_data.US_distance == 8100) output_data.US_distance = 255;

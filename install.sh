@@ -1,30 +1,39 @@
 #!/bin/bash
 
-apt update
+sudo apt update
 
-apt install -y setserial udev autoconf nano libceres-dev liblua5.2-dev
+sudo apt install -y setserial udev autoconf nano libceres-dev liblua5.2-dev
 
-cp 10-usb.rules /etc/udev/rules.d
-udevadm control --reload-rules
-udevadm trigger
+sudo cp 10-usb.rules /etc/udev/rules.d
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+sudo apt install -y build-essential
 
 git clone --single-branch --branch v3.1.6 https://github.com/stephane/libmodbus.git
 
-cd libmodbus && ./autogen.sh && ./configure && make install && cd .. && rm -r libmodbus 
+cd libmodbus
+./autogen.sh
+./configure
+sudo make install
+cd ..
+sudo rm -r libmodbus 
 
-apt install --no-install-recommends -y \
+sudo apt install --no-install-recommends -y \
     python3-pip \
     python3-tk \
     python3-serial \
     python3-matplotlib \
     python3-setuptools \
-    && rm -rf /var/lib/apt/lists/*
+    python-pip \
+    python-tk \
+    python-serial \
+    python-matplotlib \
+    python-setuptools   
 
-apt install build-essential
+sudo ldconfig
 
-
-cd python_api && sudo python3 setup.py install && cd ..
-
+cd python_api && sudo python3 setup.py install && sudo python setup.py install && cd ..
 
 cd c_api && make && cd ..
 

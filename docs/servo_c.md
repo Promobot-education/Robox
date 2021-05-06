@@ -112,6 +112,7 @@ Servo.c
             addr: адрес устройства 
         Returns:
             данные с сервопривода. Словарь с ключами:
+                "ID"
                 "Torque", 
                 "Setpoint" 
                 "Position" 

@@ -30,6 +30,8 @@ _COMMAND_REG        = 40
 _ERRORS_REG         = 45
 _CURRENT_REG        = 49
 
+_SPEED_LIMIT_REG    = 22
+
 _PID_SPEED_P_REG    = 10
 _PID_SPEED_I_REG    = 12
 _PID_SPEED_D_REG    = 14
@@ -40,7 +42,7 @@ _PID_POS_D_REG      = 20
 
 
 #Allowed commands
-_PASS_COMMANDS      = [0xDEAD,
+_PASS_COMMANDS      = [0x0,0xDEAD,
                       0xAAAA]
 
 #PID max and min values
@@ -65,15 +67,17 @@ class Servo():
     Args:
         * master (ModbusRTU): объект посдеовательного порта`.
         * addr (int): Адрес устройства. 1-250
+        * init (bool): Инициализация
     
     """
-    def __init__(self,addr,master):
+    def __init__(self,addr,master,init = True):
 
 
         self.master = master
         self.addr = addr
-        self.logger = modbus_tk.utils.create_logger("console")   
-        self._init_settings()
+        self.logger = modbus_tk.utils.create_logger("console")
+        if (init):   
+            self._init_settings()
 
 
 
@@ -174,8 +178,29 @@ class Servo():
 
 
     @except_decorator
+    def set_speed(self,speed):
+        """Установка скорости сервопривода.
+
+        Args:
+            * speed (int): speed limit. 
+        Returns:
+            * True если отправка команды прошла успешно
+            * False если при отправке команды произошла ошибка
+        Raises:
+            ValueError
+
+        """
+        if speed > 0:                 
+            val = self._float_to_bytes(speed)
+            return self.master.execute(self.addr, cst.WRITE_MULTIPLE_REGISTERS, _SPEED_LIMIT_REG, output_value=val)
+        else:
+            raise ValueError("Wrong speed value!")
+
+
+
+    @except_decorator
     def set_command(self,command):
-        """Write command to servo.
+        """Отправка команды в сервопривод.
 
         Args:
             * command (int): one of available commands. 
@@ -190,7 +215,6 @@ class Servo():
             return self.master.execute(self.addr, cst.WRITE_SINGLE_REGISTER, _COMMAND_REG, output_value=command)
         else:
             raise ValueError("Wrong command for command_register!")
-
 
 
     @except_decorator
@@ -360,6 +384,7 @@ class Servo():
             None
         Returns:
             * Словарь с ключами: 
+                | "ID", 
                 | "Torque", 
                 | "Setpoint" 
                 | "Position" 
@@ -382,6 +407,7 @@ class Servo():
         values = self.master.execute(self.addr, cst.READ_HOLDING_REGISTERS, 0, 50)
         if values:
         
+            data["ID"]              = values[0]
             data["Torque"]          = values[_TORQUE_REG]
             data["Setpoint"]        = self._getSignedNumber(values[_SETPOINT_REG],16)
             data["Position"]        = self._getSignedNumber(values[_POS_REG],16)

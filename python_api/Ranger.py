@@ -26,7 +26,7 @@ _MIN_DIST_REGISTER  = 5
 
 
 #Allowed commands
-_PASS_COMMANDS      = [0xDEAD]
+_PASS_COMMANDS      = [0x0,0xDEAD]
 
 #Allowed distance for                       
 _MAX_LED_DIST       = 2000
@@ -37,9 +37,8 @@ class Sensor():
     """Класс для работы с датчиком расстояния
 
     Args:
-        * port (str): Имя последовательног порта шины данных, например ``/dev/RS485``.
-        * address (int): Адрес устройства. 1-250
-        * baudrate (int): Скорость соединения. По умолчанию 460800 Бод
+        * master (ModbusRTU): объект посдеовательного порта`.
+        * addr (int): Адрес устройства. 1-250
         
     """
 

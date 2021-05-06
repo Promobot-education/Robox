@@ -12,14 +12,7 @@ servo_plot.py
 import matplotlib.pyplot as plt
 import Servo
 import time
-
-import serial
-
-import modbus_tk
-import modbus_tk.defines as cst
-from modbus_tk import modbus_rtu
-
-
+import bus_handler
 
 #Порт шины данных. По умолчпнию /dev/RS_485
 port        = '/dev/RS_485'
@@ -27,11 +20,11 @@ port        = '/dev/RS_485'
 #Адрес сервопривода. По умолчанию 10
 servo_id    = 10
 
-#Инициализация последовательного порта
-master = modbus_rtu.RtuMaster(serial.Serial(port=port, baudrate=460800, bytesize=8, parity='N', stopbits=1, xonxoff=0))
+#Инициализация шины передачи данных
+master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0)
 
 #Инициализация сервопривода
-servo = Servo.Servo(servo_id,master)
+servo = Servo.Servo(servo_id, master.bus)
 
 #Желаемая позиция сервопривода
 set_point   = 4000

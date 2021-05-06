@@ -276,6 +276,7 @@ struct servo_data get_servo_data(int addr)
 	}
 	else
 	{ 
+		output_data.ID          =  regData[0];
 		output_data.torque      =  regData[TORQUE_REG];
 		output_data.command 	=  regData[COMMAND_REG];
 		output_data.setpoint 	=  (int16_t)regData[SETPOINT_REG];

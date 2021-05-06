@@ -22,19 +22,22 @@
 #define ERRORS_REG         45
 #define CURRENT_REG        49
 
-#define PID_POS_P_REG      10
-#define PID_POS_I_REG      12
-#define PID_POS_D_REG      14
 
-#define PID_SPEED_P_REG    16
-#define PID_SPEED_I_REG    18
-#define PID_SPEED_D_REG    20
+#define PID_SPEED_P_REG    10
+#define PID_SPEED_I_REG    12
+#define PID_SPEED_D_REG    14
+
+
+#define PID_POS_P_REG      16
+#define PID_POS_I_REG      18
+#define PID_POS_D_REG      20
 
 
 #define PID_MAX_VALUE      20.0
 #define PID_MIN_VALUE      0.0
 
 struct servo_data {
+   int16_t ID;
    bool torque;
    int16_t setpoint;
    int16_t position;
