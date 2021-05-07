@@ -69,7 +69,7 @@ class Servo():
     def __init__(self, port, address, baudrate = 460800, debug = False, ping = False):
         modbus_io.CLOSE_PORT_AFTER_EACH_CALL = False
         modbus_io.BAUDRATE = baudrate
-        modbus_io.TIMEOUT = 0.05
+        modbus_io.TIMEOUT = 0.1
         try:
             self.client = modbus_io.Instrument(port, address)
             self.client.debug = debug

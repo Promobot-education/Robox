@@ -4,7 +4,7 @@ import time
 import argparse
 import modbus_io
 import struct
-import Servo
+import Servo_service as Servo
 
 py_ver = sys.version_info[0]
 
@@ -26,7 +26,6 @@ instr = None
 def ping():
 	print("Pinging devices...")
 	for element in range(0, 50):
-		time.sleep(0.01)
 		try:
 			temp = Servo.Servo(mod_port,element,debug = False,ping = True)
 			val = temp._ping(2, 1, 3)
@@ -38,6 +37,7 @@ def ping():
 
       
 def reboot_device(device):
+	global instr
 	print("Firmwaring device " + str(device) + " ...")
 	data = bytearray([0x00,0x01])
 	try:
@@ -58,6 +58,7 @@ def reboot_device(device):
 
 
 def send_parts(packet,parts):
+	global instr
 	packet_array = struct.pack(">H",int(packet))
 	parts_array = struct.pack(">H",int(parts))
 
@@ -84,6 +85,7 @@ def send_parts(packet,parts):
 
 
 def send_data(packet,parts):
+	global instr
 	a = 0
 	while a <= parts + 1:
 		k = 0
@@ -135,8 +137,7 @@ def set_params(id):
 def boot(id):
 	global instr
 	
-	instr = Servo.Servo(mod_port,id)
-	instr.debug = True
+	instr = Servo.Servo(mod_port,id,False)
 	reboot_device(id)
 	send_parts(packet,parts)
 	time.sleep(1)
@@ -153,3 +154,4 @@ parts = (len(b)/packet)
 
 ping()
 boot(ping_devs[0])
+
