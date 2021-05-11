@@ -15,7 +15,7 @@ sudo socat -d -d pty,link=/dev/RS_485,raw,echo=0,perm=0666 tcp:$HOST_ADDR:5000
 
 3. При работе с устройствами через Python необходимо при инициалзиации шины выставить аргумент port_forward = True:
 
-```bash
+```python
 master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0, port_forward = True)
 ```
 
