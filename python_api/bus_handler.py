@@ -29,9 +29,9 @@ class Bus():
         
     """
 
-    def __init__(self, port, baudrate = 460800, debug = False, timeout = 1.0):
+    def __init__(self, port, baudrate = 460800, debug = False, timeout = 1.0, port_forward = False):
 
-        self.bus = modbus_rtu.RtuMaster(serial.Serial(port=port, baudrate=baudrate, bytesize=8, parity='N', stopbits=1, xonxoff=0)) 
+        self.bus = modbus_rtu.RtuMaster(serial.Serial(port=port, baudrate=baudrate, bytesize=8, parity='N', stopbits=1, xonxoff=0, rtscts=port_forward, dsrdtr=port_forward)) 
 
         self.bus.set_verbose(debug)
 
