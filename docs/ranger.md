@@ -1,6 +1,6 @@
 # Датчик расстояния
 
-[<img src="https://github.com/Promobot-education/robox/blob/master/docs/res/ranger.png" width="600"/>](ranger.png)
+[<img src="https://github.com/Promobot-education/robox/blob/master/docs/res/ranger.png" width="400"/>](ranger.png)
 
 Датчик расстояния Promobot предназначен для детектирования препятствий и последующего определения расстояния до них. В данном устройстве используются как ультразвуковые (УЗ) сигналы измерения, так и инфракрасные (ИК)
 
