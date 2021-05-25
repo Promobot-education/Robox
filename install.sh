@@ -33,6 +33,6 @@ sudo apt install --no-install-recommends -y \
 
 sudo ldconfig
 
-cd python_api && sudo python3 setup.py install && sudo python setup.py install && cd ..
+cd python && sudo python3 setup.py install && sudo python setup.py install && cd ..
 
-cd c_api && make && cd ..
+cd c && make && cd ..
