@@ -17,7 +17,7 @@ OBJ_APP2 = $(patsubst %.c, %.o, $(SOURCE_APP2))
 OBJ_APP3 = $(patsubst %.c, %.o, $(SOURCE_APP3))
 OBJ_APP4 = $(patsubst %.c, %.o, $(SOURCE_APP4))
 
-INCLUDE_COMMON = -I./include -I/usr/local/include/modbus -lmodbus
+INCLUDE_COMMON = -I./include -I/usr/local/include/modbus -L/usr/local/lib -lmodbus
 
 CFLAGS = -Wall -c
 CC = gcc

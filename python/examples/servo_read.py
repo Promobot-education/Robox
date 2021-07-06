@@ -16,7 +16,7 @@ import bus_handler
 port        = '/dev/RS_485'
 
 #Адрес сервопривода. По умолчанию 10
-servo_id    = 22
+servo_id    = 10
 
 #Инициализация шины передачи данных
 master = bus_handler.Bus(port = port, baudrate = 460800, debug = False, timeout = 1.0)
