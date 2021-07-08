@@ -182,7 +182,7 @@ class Servo():
         """Установка скорости сервопривода.
 
         Args:
-            * speed (int): speed limit. 
+            * speed (float): speed limit. 
         Returns:
             * True если отправка команды прошла успешно
             * False если при отправке команды произошла ошибка
@@ -203,7 +203,7 @@ class Servo():
         """Отправка команды в сервопривод.
 
         Args:
-            * command (int): one of available commands. 
+            * command (int(hex)): one of available commands. 
         Returns:
             * True если отправка команды прошла успешно
             * False если при отправке команды произошла ошибка
