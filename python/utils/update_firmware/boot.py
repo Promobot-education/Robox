@@ -116,12 +116,15 @@ def send_data(packet,parts):
 
 
 def set_params(id):
+	temp = instr._read_registers(3,1,3)
+	temp_bit = temp[0] & (1 << 3)
+
 	version = instr._read_registers(2,1,3)
 	print(version[0])
-	instr._write_register(3,8206,signed=False)
+	instr._write_register(3,8198 | temp_bit,signed=False)
 	instr._write_register(4,34429,signed=False) 
 	instr.set_Speed_PID_P(15)
-	instr.set_Speed_PID_I(0.01)
+	instr.set_Speed_PID_I(0.1)
 	instr.set_Speed_PID_D(10)	 
 	instr.set_Pos_PID_P(0.1)
 	instr.set_Pos_PID_I(0)

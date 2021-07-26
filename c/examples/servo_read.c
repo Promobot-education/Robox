@@ -22,6 +22,7 @@ int main()
 
   //Инициализация сервопривода
   init_servo(servo_addr);
+  set_torque(10, true);
 
   while (1) 
   {  
@@ -34,6 +35,7 @@ int main()
     printf("Setpoint: %i\n",data.setpoint);
     printf("Motor current: %i mA \n\n",data.current);
     usleep(10000);
-  }   
+  }
+
   return 0; 
 }
