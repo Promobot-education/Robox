@@ -196,6 +196,10 @@ class Servo():
         else:
             raise ValueError("Wrong speed value!")
 
+    @except_decorator
+    def set_speed_limit(self,speed):
+        self.set_speed(speed)
+
 
 
     @except_decorator
@@ -422,4 +426,4 @@ class Servo():
             data["Speed_PID_D"]     = self._bytes_to_float(values[_PID_SPEED_D_REG],values[_PID_SPEED_D_REG + 1])
             data["Errors"]          = self._read_errors(values[_ERRORS_REG])
         
-        return data                                             
+        return data                                   
