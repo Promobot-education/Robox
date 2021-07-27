@@ -282,7 +282,7 @@ struct servo_data get_servo_data(int addr)
 		output_data.setpoint 	=  (int16_t)regData[SETPOINT_REG];
 		output_data.position 	=  (int16_t)regData[POS_REG];
 		output_data.speed 		=  (int16_t)regData[SPEED_REG];
-		output_data.current     =  (int16_t)regData[SPEED_REG];
+		output_data.current     =  (int16_t)regData[CURRENT_REG];
 
 		f.i = regData[PID_POS_P_REG] |  (regData[PID_POS_P_REG + 1] <<16);
 		output_data.pos_PID_P = f.f;	
