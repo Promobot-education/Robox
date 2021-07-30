@@ -2,13 +2,13 @@
 
 sudo apt update
 
-sudo apt install -y setserial udev autoconf nano libceres-dev liblua5.2-dev
+sudo apt install -y setserial udev autoconf nano libceres-dev liblua5.2-dev make gcc
 
 sudo cp 10-usb.rules /etc/udev/rules.d
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-sudo apt install -y build-essential
+sudo apt install -y build-essential git
 
 git clone --single-branch --branch v3.1.6 https://github.com/stephane/libmodbus.git
 
@@ -34,5 +34,3 @@ sudo apt install --no-install-recommends -y \
 sudo ldconfig
 
 cd python && sudo python3 setup.py install && sudo python setup.py install && cd ..
-
-cd c && make && cd ..
